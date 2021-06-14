@@ -1,0 +1,24 @@
+import socket , cv2 , pickle , struct
+s = socket.socket()
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+port = 10050
+ip = "192.168.43.93"
+s.bind((ip , port))
+s.listen(5)
+
+    while True:
+        csession,addr = s.accept()
+        
+        if csession:
+            vid = cv2.VideoCapture(0)
+            while(vid.isOpened()):
+                img , frame = vid.read()
+                a = pickle.dumps(frame)
+                message = struct.pack("Q",len(a))+a
+                csession.sendall(message)
+                cv2.imshow('hi' , frame)
+                key = cv2.waitKey(1) & 0xFF
+                if key==13:
+                    csession.close()
+                    break
+cv2.destroyAllWindows()
